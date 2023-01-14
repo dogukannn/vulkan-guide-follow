@@ -4,6 +4,7 @@
 #pragma once
 
 #include <vk_types.h>
+#include <vector>
 
 class VulkanEngine {
 public:
@@ -15,6 +16,23 @@ public:
 
 	struct SDL_Window* _window{ nullptr };
 
+	VkInstance _instance;
+	VkDebugUtilsMessengerEXT _debug_messenger;
+	VkPhysicalDevice _chosenGPU;
+	VkDevice _device;
+	VkSurfaceKHR _surface;
+
+	VkSwapchainKHR _swapchain;
+	VkFormat _swapchainImageFormat;
+
+	std::vector<VkImage> _swapchainImages;
+	std::vector<VkImageView> _swapchainImageViews;
+
+
+
+	void init_swapchain();
+	void init_vulkan();
+	
 	//initializes everything in the engine
 	void init();
 
