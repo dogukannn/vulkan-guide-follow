@@ -41,6 +41,11 @@ void VulkanEngine::init_swapchain()
 	_swapchainImageFormat = vkbSwapchain.image_format;
 }
 
+void VulkanEngine::init_commands()
+{
+
+}
+
 void VulkanEngine::init_vulkan()
 {
 	vkb::InstanceBuilder builder;
@@ -70,8 +75,8 @@ void VulkanEngine::init_vulkan()
 	_device = vkbDevice.device;
 	_chosenGPU = physicalDevice.physical_device;
 
-
-
+	_graphicsQueue = vkbDevice.get_queue(vkb::QueueType::graphics).value();
+	_graphicsQueueFamily = vkbDevice.get_queue_index(vkb::QueueType::graphics).value();
 }
 
 void VulkanEngine::init()
@@ -93,6 +98,7 @@ void VulkanEngine::init()
 	//init vulkan stuff
 	init_vulkan();
 	init_swapchain();
+	init_commands();
 	
 	//everything went fine
 	_isInitialized = true;
