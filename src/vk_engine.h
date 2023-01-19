@@ -34,9 +34,19 @@ public:
 	VkCommandPool _commandPool;
 	VkCommandBuffer _mainCommandBuffer;
 
+	VkRenderPass _renderPass;
+
+	std::vector<VkFramebuffer> _framebuffers;
+	
+	VkSemaphore _presentSemaphore, _renderSemaphore;
+	VkFence _renderFence;
+
 	void init_vulkan();
 	void init_swapchain();
 	void init_commands();
+	void init_default_renderpass();
+	void init_framebuffers();
+	void init_sync_structures();
 	
 	//initializes everything in the engine
 	void init();
