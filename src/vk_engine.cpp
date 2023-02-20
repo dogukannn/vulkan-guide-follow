@@ -33,6 +33,7 @@ void VulkanEngine::init_swapchain()
 		.set_desired_extent(_windowExtent.width, _windowExtent.height)
 		.build()
 		.value();
+	
 
 	_swapchain = vkbSwapchain.swapchain;
 	_swapchainImages = vkbSwapchain.get_images().value();
@@ -151,7 +152,7 @@ void VulkanEngine::init_vulkan()
 	_device = vkbDevice.device;
 	_chosenGPU = physicalDevice.physical_device;
 
-	_graphicsQueue = vkbDevice.get_queue(vkb::QueueType::graphics).value();
+	_graphicsQueue = vkbDevice.get_queue(vkb::QueueType::graphics).value(); 
 	_graphicsQueueFamily = vkbDevice.get_queue_index(vkb::QueueType::graphics).value();
 }
 
@@ -222,14 +223,82 @@ void VulkanEngine::draw()
 	VK_CHECK(vkWaitForFences(_device, 1, &_renderFence, true, 1000000000));
 	VK_CHECK(vkResetFences(_device, 1, &_renderFence));
 
+	//TODO try this with a fence to see it does not need to be a sempaphore (it will sure be more efficient)
+	uint32_t swapChainImageIndex;
+	VK_CHECK(vkAcquireNextImageKHR(_device, _swapchain, 1000000000, _presentSemaphore, nullptr, &swapChainImageIndex));
 
+	VK_CHECK(vkResetCommandBuffer(_mainCommandBuffer, 0));
+
+	VkCommandBuffer cmd = _mainCommandBuffer;
+
+	VkCommandBufferBeginInfo cmdBeginInfo = {};
+	cmdBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	cmdBeginInfo.pNext = nullptr;
+	cmdBeginInfo.pInheritanceInfo = nullptr;
+	cmdBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+	VK_CHECK(vkBeginCommandBuffer(cmd, &cmdBeginInfo));
+
+	VkClearValue clearValue;
+	float flash = abs(sin(_frameNumber / 120.f));
+	clearValue.color = { { 0.f, 0.f, flash, 1.f}};
+
+	VkRenderPassBeginInfo rpInfo = {};
+	rpInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	rpInfo.pNext = nullptr;
+
+	rpInfo.renderPass = _renderPass;
+	rpInfo.renderArea.offset = {0, 0};
+	rpInfo.renderArea.extent = _windowExtent;
+	rpInfo.framebuffer = _framebuffers[swapChainImageIndex];
+
+	rpInfo.clearValueCount = 1;
+	rpInfo.pClearValues = &clearValue;
+	
+	vkCmdBeginRenderPass(cmd, &rpInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+	vkCmdEndRenderPass(cmd);
+	VK_CHECK(vkEndCommandBuffer(cmd));
+
+	VkSubmitInfo submit = {};
+	submit.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	submit.pNext = nullptr;
+	VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+
+	submit.pWaitDstStageMask = &waitStage;
+
+	submit.waitSemaphoreCount = 1;
+	submit.pWaitSemaphores = &_presentSemaphore;
+
+	submit.signalSemaphoreCount = 1;
+	submit.pSignalSemaphores = &_renderSemaphore;
+	
+	submit.commandBufferCount=  1;
+	submit.pCommandBuffers = &cmd;
+
+	VK_CHECK(vkQueueSubmit(_graphicsQueue, 1, &submit, _renderFence));
+
+	VkPresentInfoKHR presentInfo = {};
+	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+	presentInfo.pNext = nullptr;
+
+	presentInfo.pSwapchains = &_swapchain;
+	presentInfo.swapchainCount = 1;
+
+	presentInfo.waitSemaphoreCount = 1;
+	presentInfo.pWaitSemaphores = &_renderSemaphore;
+
+	presentInfo.pImageIndices = &swapChainImageIndex;
+
+	VK_CHECK(vkQueuePresentKHR(_graphicsQueue, &presentInfo));
+
+	_frameNumber++;
 }
 
 void VulkanEngine::run()
 {
 	SDL_Event e;
 	bool bQuit = false;
-
 	//main loop
 	while (!bQuit)
 	{
