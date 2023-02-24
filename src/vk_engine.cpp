@@ -10,6 +10,7 @@
 #include <VkBootstrap.h>
 
 #include <iostream>
+#include <fstream>
 
 //we want to immediately abort when there is an error. In normal engines this would give an error message to the user, or perform a dump of state.
 #define VK_CHECK(x)                                                 \
@@ -122,6 +123,55 @@ void VulkanEngine::init_sync_structures()
 	VK_CHECK(vkCreateSemaphore(_device, &semaphoreCreateInfo, nullptr, &_presentSemaphore));
 }
 
+bool VulkanEngine::load_shader_module(const char* filePath, VkShaderModule& outShaderMoudle)
+{
+	std::ifstream file(filePath, std::ios::ate | std::ios::binary);
+	if(!file.is_open())
+	{
+		return false;
+	}
+	size_t fileSize = (size_t)file.tellg();
+
+	std::vector<uint32_t> buffer(fileSize / sizeof(uint32_t));
+
+	file.seekg(0);
+	file.read((char*)buffer.data(), fileSize);
+	file.close();
+
+	VkShaderModuleCreateInfo create_info = {};
+	create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+	create_info.pNext= nullptr;
+
+	create_info.codeSize = buffer.size() * sizeof(uint32_t);
+	create_info.pCode = buffer.data();
+
+	if(vkCreateShaderModule(_device, &create_info, nullptr, &outShaderMoudle) != VK_SUCCESS)
+	{
+		return false;
+	}
+	return true;
+}
+
+void VulkanEngine::init_pipeline()
+{
+	VkShaderModule triangleFragShader;
+	if(!load_shader_module("../../shaders/triangle.frag.spv", triangleFragShader))
+	{
+		std::cout << "Error loading triangle frag shader" << std::endl;
+		return;
+	}
+	
+	VkShaderModule triangleVertShader;
+	if(!load_shader_module("../../shaders/triangle.vert.spv", triangleFragShader))
+	{
+		std::cout << "Error loading triangle vert shader" << std::endl;
+		return;
+	}
+	std::cout << "Shaders loaded successfully" << std::endl;
+
+	
+}
+
 
 void VulkanEngine::init_vulkan()
 {
@@ -179,7 +229,7 @@ void VulkanEngine::init()
 	init_default_renderpass();
 	init_framebuffers();
 	init_sync_structures();
-	
+	init_pipeline();	
 	//everything went fine
 	_isInitialized = true;
 }

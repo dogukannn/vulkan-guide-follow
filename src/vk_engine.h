@@ -47,6 +47,9 @@ public:
 	void init_default_renderpass();
 	void init_framebuffers();
 	void init_sync_structures();
+
+	bool load_shader_module(const char* filePath, VkShaderModule& outShaderMoudle);
+	void init_pipeline();
 	
 	//initializes everything in the engine
 	void init();

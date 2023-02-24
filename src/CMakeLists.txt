@@ -9,7 +9,7 @@ add_executable(vulkan_start
     vk_initializers.h)
 
 
-set_property(TARGET vulkan_start PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:vulkan_guide>")
+set_property(TARGET vulkan_start PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:vulkan_start>")
 
 target_include_directories(vulkan_start PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 target_link_libraries(vulkan_start vkbootstrap vma glm tinyobjloader imgui stb_image)
