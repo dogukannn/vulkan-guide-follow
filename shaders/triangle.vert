@@ -1,5 +1,6 @@
 #version 450
 
+
 void main()
 {
     const vec3 positions[3] = vec3[3]

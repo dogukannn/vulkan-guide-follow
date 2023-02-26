@@ -5,6 +5,17 @@
 
 #include <vk_types.h>
 #include <vector>
+#include <functional>
+#define VK_1SEC 1000000000
+
+class DeletionQueue
+{
+	std::vector<std::function<void()>> deletionQueue;
+public:
+	void PushFunction(std::function<void()>&& function);
+	void Flush();
+};
+
 class PipelineBuilder
 {
 public:
@@ -23,10 +34,11 @@ public:
 
 class VulkanEngine {
 public:
-
+	int shaderIndex = 0;
 	bool _isInitialized{ false };
 	int _frameNumber {0};
-
+	DeletionQueue _mainDeletionQueue;
+	
 	VkExtent2D _windowExtent{ 1700 , 900 };
 
 	struct SDL_Window* _window{ nullptr };
@@ -57,7 +69,8 @@ public:
 	VkFence _renderFence;
 
 	VkPipelineLayout _trianglePipelineLayout;
-	VkPipeline _trianglePipeline;
+	VkPipeline _coloredTrianglePipeline;
+	VkPipeline _redTrianglePipeline;
 
 	void init_vulkan();
 	void init_swapchain();

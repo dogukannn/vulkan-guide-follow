@@ -19,7 +19,6 @@ VkCommandBufferAllocateInfo vkinit::command_buffer_allocate_info(VkCommandPool p
 	cmdAllocInfo.commandPool = pool;
 	cmdAllocInfo.commandBufferCount = count;
 	cmdAllocInfo.level = level;
-
 	return cmdAllocInfo;
 }
 
@@ -115,5 +114,23 @@ VkPipelineLayoutCreateInfo vkinit::pipeline_layout_create_info()
 	info.pushConstantRangeCount = 0;
 	info.pPushConstantRanges = nullptr;
 
+	return info;
+}
+
+VkFenceCreateInfo vkinit::fence_create_info(VkFenceCreateFlags flags)
+{
+	VkFenceCreateInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+	info.pNext = nullptr;
+	info.flags = flags;
+	return info;
+}
+
+VkSemaphoreCreateInfo vkinit::semaphore_create_info(VkSemaphoreCreateFlags flags)
+{
+	VkSemaphoreCreateInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+	info.pNext = nullptr;
+	info.flags = flags;
 	return info;
 }
