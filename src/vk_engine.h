@@ -6,6 +6,8 @@
 #include <vk_types.h>
 #include <vector>
 #include <functional>
+#include "vk_mesh.h"
+
 #define VK_1SEC 1000000000
 
 class DeletionQueue
@@ -37,6 +39,9 @@ public:
 	int shaderIndex = 0;
 	bool _isInitialized{ false };
 	int _frameNumber {0};
+
+	VmaAllocator _allocator;
+	
 	DeletionQueue _mainDeletionQueue;
 	
 	VkExtent2D _windowExtent{ 1700 , 900 };
@@ -71,7 +76,12 @@ public:
 	VkPipelineLayout _trianglePipelineLayout;
 	VkPipeline _coloredTrianglePipeline;
 	VkPipeline _redTrianglePipeline;
+	VkPipeline _meshPipeline;
+	Mesh _triangleMesh;
 
+	void load_meshes();
+	void upload_mesh(Mesh& mesh);
+	
 	void init_vulkan();
 	void init_swapchain();
 	void init_commands();
