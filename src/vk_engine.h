@@ -87,7 +87,8 @@ public:
 	VkPipeline _redTrianglePipeline;
 	VkPipeline _meshPipeline;
 	Mesh _triangleMesh;
-
+	Mesh _monkeyMesh;
+	
 	void load_meshes();
 	void upload_mesh(Mesh& mesh);
 	

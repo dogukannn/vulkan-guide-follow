@@ -381,8 +381,11 @@ void VulkanEngine::load_meshes()
 	_triangleMesh._vertices[0].color = {1.f, 1.f, 0.f};
 	_triangleMesh._vertices[1].color = {1.f, 1.f, 0.f};
 	_triangleMesh._vertices[2].color = {1.f, 1.f, 0.f};
-
+	
+	_monkeyMesh.load_from_obj("../../assets/monkey_smooth.obj");
+	
 	upload_mesh(_triangleMesh);
+	upload_mesh(_monkeyMesh);
 }
 
 void VulkanEngine::upload_mesh(Mesh& mesh)
@@ -538,7 +541,7 @@ void VulkanEngine::draw()
 
 	vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, _meshPipeline);
 	VkDeviceSize offset = 0;
-	vkCmdBindVertexBuffers(cmd, 0, 1, &_triangleMesh._vertexBuffer._buffer, &offset);
+	vkCmdBindVertexBuffers(cmd, 0, 1, &_monkeyMesh._vertexBuffer._buffer, &offset);
 
 	glm::vec3 camPos = {0.f, 0.f, -2.f};
 	glm::mat4 view = glm::translate(glm::mat4(1.f), camPos);
@@ -554,7 +557,7 @@ void VulkanEngine::draw()
 
 	vkCmdPushConstants(cmd, _meshPipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(MeshPushConstants), &constants);
 	
-	vkCmdDraw(cmd, _triangleMesh._vertices.size(), 1, 0, 0);
+	vkCmdDraw(cmd, _monkeyMesh._vertices.size(), 1, 0, 0);
 	
 	vkCmdEndRenderPass(cmd);
 	VK_CHECK(vkEndCommandBuffer(cmd));

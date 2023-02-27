@@ -23,6 +23,7 @@ struct Vertex
 struct Mesh
 {
     std::vector<Vertex> _vertices;
-
     AllocatedBuffer _vertexBuffer;
+
+    bool load_from_obj(const char* filename);
 };
