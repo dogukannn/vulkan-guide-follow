@@ -38,6 +38,7 @@ public:
 	VkPipelineColorBlendAttachmentState _colorBlendAttachmentState;
 	VkPipelineMultisampleStateCreateInfo _multisampling;
 	VkPipelineLayout _pipelineLayout;
+	VkPipelineDepthStencilStateCreateInfo _depthStencil;
 	
 	VkPipeline build_pipeline(VkDevice device, VkRenderPass pass);
 };
@@ -68,6 +69,11 @@ public:
 	std::vector<VkImage> _swapchainImages;
 	std::vector<VkImageView> _swapchainImageViews;
 
+	VkImageView _depthImageView;
+	AllocatedImage _depthImage;
+
+	VkFormat _depthFormat;
+	
 	VkQueue _graphicsQueue;
 	uint32_t _graphicsQueueFamily;
 
