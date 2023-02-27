@@ -7,6 +7,8 @@
 #include <vector>
 #include <functional>
 #include "vk_mesh.h"
+#include <glm/glm.hpp>
+#include "glm/gtc/matrix_transform.hpp"
 
 #define VK_1SEC 1000000000
 
@@ -16,6 +18,12 @@ class DeletionQueue
 public:
 	void PushFunction(std::function<void()>&& function);
 	void Flush();
+};
+
+struct MeshPushConstants
+{
+	glm::vec4 data;
+	glm::mat4 render_matrix;
 };
 
 class PipelineBuilder
@@ -74,6 +82,7 @@ public:
 	VkFence _renderFence;
 
 	VkPipelineLayout _trianglePipelineLayout;
+	VkPipelineLayout _meshPipelineLayout;
 	VkPipeline _coloredTrianglePipeline;
 	VkPipeline _redTrianglePipeline;
 	VkPipeline _meshPipeline;

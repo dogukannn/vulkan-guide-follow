@@ -2,6 +2,8 @@
 #include "vk_engine.h"
 
 #define VMA_IMPLEMENTATION
+#include <complex>
+
 #include "vk_mem_alloc.h"
 
 #include <SDL.h>
@@ -220,8 +222,21 @@ void VulkanEngine::init_pipeline()
 	std::cout << "Shaders loaded successfully" << std::endl;
 
 	auto pipelineLayoutInfo = vkinit::pipeline_layout_create_info();
-	vkCreatePipelineLayout(_device, &pipelineLayoutInfo, nullptr, &_trianglePipelineLayout);
+	VK_CHECK(vkCreatePipelineLayout(_device, &pipelineLayoutInfo, nullptr, &_trianglePipelineLayout));
 
+
+	auto meshPipelineLayoutInfo = vkinit::pipeline_layout_create_info();
+	VkPushConstantRange push_constant;
+	push_constant.offset = 0;
+	push_constant.size = sizeof(MeshPushConstants);
+	push_constant.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+	meshPipelineLayoutInfo.pPushConstantRanges = &push_constant;
+	meshPipelineLayoutInfo.pushConstantRangeCount = 1;
+
+	VK_CHECK(vkCreatePipelineLayout(_device, &meshPipelineLayoutInfo, nullptr, &_meshPipelineLayout));
+	
+	
 	PipelineBuilder pipelineBuilder;
 
 	pipelineBuilder._shaderStages.push_back(vkinit::pipeline_shader_stage_create_info(VK_SHADER_STAGE_VERTEX_BIT, redTriangleVertShader));
@@ -267,7 +282,8 @@ void VulkanEngine::init_pipeline()
 	pipelineBuilder._shaderStages.clear();
 	pipelineBuilder._shaderStages.push_back(vkinit::pipeline_shader_stage_create_info(VK_SHADER_STAGE_VERTEX_BIT, meshVertShader));
 	pipelineBuilder._shaderStages.push_back(vkinit::pipeline_shader_stage_create_info(VK_SHADER_STAGE_FRAGMENT_BIT, coloredTriangleFragShader));
-
+	pipelineBuilder._pipelineLayout = _meshPipelineLayout;
+	
 	_meshPipeline = pipelineBuilder.build_pipeline(_device, _renderPass);
 	
 	vkDestroyShaderModule(_device, coloredTriangleFragShader, nullptr);	
@@ -282,6 +298,7 @@ void VulkanEngine::init_pipeline()
 		vkDestroyPipeline(_device, _meshPipeline, nullptr);
 
 		vkDestroyPipelineLayout(_device, _trianglePipelineLayout, nullptr);
+		vkDestroyPipelineLayout(_device, _meshPipelineLayout, nullptr);
 	});
 
 
@@ -523,6 +540,20 @@ void VulkanEngine::draw()
 	VkDeviceSize offset = 0;
 	vkCmdBindVertexBuffers(cmd, 0, 1, &_triangleMesh._vertexBuffer._buffer, &offset);
 
+	glm::vec3 camPos = {0.f, 0.f, -2.f};
+	glm::mat4 view = glm::translate(glm::mat4(1.f), camPos);
+
+	glm::mat4 projection = glm::perspective(glm::radians(70.f), 1700.f / 900.f, 0.1f, 200.0f);
+	projection[1][1] = -1;
+
+	glm::mat4 model = glm::rotate(glm::mat4(1.f), glm::radians(_frameNumber * 0.4f), glm::vec3(0,1, 0));
+	glm::mat4 mesh_matrix = projection * view * model;
+
+	MeshPushConstants constants = {};
+	constants.render_matrix = mesh_matrix;
+
+	vkCmdPushConstants(cmd, _meshPipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(MeshPushConstants), &constants);
+	
 	vkCmdDraw(cmd, _triangleMesh._vertices.size(), 1, 0, 0);
 	
 	vkCmdEndRenderPass(cmd);
