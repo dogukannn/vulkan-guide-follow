@@ -60,6 +60,16 @@ public:
 	VkPipeline build_pipeline(VkDevice device, VkRenderPass pass);
 };
 
+struct FrameData
+{
+	VkSemaphore _presentSemaphore, _renderSemaphore;
+	VkFence _renderFence;
+
+	VkCommandPool _commandPool;
+	VkCommandBuffer _mainCommandBuffer;
+};
+constexpr unsigned int FRAME_OVERLAP = 2;
+
 class VulkanEngine {
 public:
 	int shaderIndex = 0;
@@ -94,16 +104,12 @@ public:
 	VkQueue _graphicsQueue;
 	uint32_t _graphicsQueueFamily;
 
-	VkCommandPool _commandPool;
-	VkCommandBuffer _mainCommandBuffer;
-
 	VkRenderPass _renderPass;
 
 	std::vector<VkFramebuffer> _framebuffers;
 	
-	VkSemaphore _presentSemaphore, _renderSemaphore;
-	VkFence _renderFence;
-
+	FrameData _frames[FRAME_OVERLAP];
+	
 	VkPipelineLayout _trianglePipelineLayout;
 	VkPipelineLayout _meshPipelineLayout;
 	VkPipeline _coloredTrianglePipeline;
@@ -115,6 +121,8 @@ public:
 	std::vector<RenderObject> _renderables;
 	std::unordered_map<std::string, Material> _materials;
 	std::unordered_map<std::string, Mesh> _meshes;
+
+	FrameData& get_current_frame();
 	
 	void load_meshes();
 	void init_scene();
