@@ -6,11 +6,26 @@
 #include <vk_types.h>
 #include <vector>
 #include <functional>
+#include <cvt/wstring>
+
 #include "vk_mesh.h"
 #include <glm/glm.hpp>
 #include "glm/gtc/matrix_transform.hpp"
 
 #define VK_1SEC 1000000000
+
+struct Material
+{
+	VkPipeline pipeline;
+	VkPipelineLayout pipelineLayout;
+};
+
+struct RenderObject
+{
+	Mesh* mesh;
+	Material* material;
+	glm::mat4 transformMatrix;
+};
 
 class DeletionQueue
 {
@@ -25,6 +40,8 @@ struct MeshPushConstants
 	glm::vec4 data;
 	glm::mat4 render_matrix;
 };
+
+
 
 class PipelineBuilder
 {
@@ -94,9 +111,18 @@ public:
 	VkPipeline _meshPipeline;
 	Mesh _triangleMesh;
 	Mesh _monkeyMesh;
+
+	std::vector<RenderObject> _renderables;
+	std::unordered_map<std::string, Material> _materials;
+	std::unordered_map<std::string, Mesh> _meshes;
 	
 	void load_meshes();
+	void init_scene();
 	void upload_mesh(Mesh& mesh);
+	Material* create_material(VkPipeline pipeline, VkPipelineLayout layout, const std::string& name);
+	Material* get_material(const std::string& name);
+	Mesh* get_mesh(const std::string& name);
+	void draw_objects(VkCommandBuffer cmd, RenderObject* first, int count);	
 	
 	void init_vulkan();
 	void init_swapchain();
