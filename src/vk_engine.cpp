@@ -638,6 +638,11 @@ void VulkanEngine::init_vulkan()
 	allocatorInfo.device = _device;
 	allocatorInfo.instance = _instance;
 	vmaCreateAllocator(&allocatorInfo, &_allocator);
+
+	_mainDeletionQueue.PushFunction([_allocator = _allocator]()
+	{
+		vmaDestroyAllocator(_allocator);
+	});
 }
 
 void VulkanEngine::init()
