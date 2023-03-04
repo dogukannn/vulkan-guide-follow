@@ -44,5 +44,9 @@ namespace vkinit {
 	VkCommandBufferBeginInfo command_buffer_begin_info(VkCommandBufferUsageFlags flags);
 
 	VkSubmitInfo submit_info(VkCommandBuffer* cmd);
+
+	VkSamplerCreateInfo sampler_create_info(VkFilter filters, VkSamplerAddressMode address_mode = VK_SAMPLER_ADDRESS_MODE_REPEAT);
+	
+	VkWriteDescriptorSet write_descriptor_image(VkDescriptorType type, VkDescriptorSet dstSet, VkDescriptorImageInfo* imageInfo, uint32_t binding);
 }
 

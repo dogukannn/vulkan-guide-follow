@@ -16,6 +16,7 @@
 
 struct Material
 {
+	VkDescriptorSet textureSet{VK_NULL_HANDLE};
 	VkPipeline pipeline;
 	VkPipelineLayout pipelineLayout;
 };
@@ -100,6 +101,12 @@ struct UploadContext
 	VkCommandBuffer _commandBuffer;
 };
 
+struct Texture
+{
+	AllocatedImage image;
+	VkImageView imageView; 
+};
+
 constexpr unsigned int FRAME_OVERLAP = 2;
 
 class VulkanEngine {
@@ -145,6 +152,7 @@ public:
 
 	VkDescriptorSetLayout _globalSetLayout;
 	VkDescriptorSetLayout _objectSetLayout;
+	VkDescriptorSetLayout _singleTextureSetLayout;
 	VkDescriptorPool _descriptorPool;
 
 	GPUSceneData _sceneParameters;
@@ -161,12 +169,14 @@ public:
 	std::vector<RenderObject> _renderables;
 	std::unordered_map<std::string, Material> _materials;
 	std::unordered_map<std::string, Mesh> _meshes;
+	std::unordered_map<std::string, Texture> _loadedTextures;
 
 	FrameData& get_current_frame();
 
 	UploadContext _uploadContext;
 	void immediate_submit(std::function<void(VkCommandBuffer cmd)>&& function);
-	
+
+	void load_images();
 	void load_meshes();
 	void init_scene();
 	void upload_mesh(Mesh& mesh);
