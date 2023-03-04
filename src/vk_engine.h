@@ -93,6 +93,13 @@ struct FrameData
 	VkDescriptorSet globalDescriptor;
 };
 
+struct UploadContext
+{
+	VkFence _uploadFence;
+	VkCommandPool _commandPool;
+	VkCommandBuffer _commandBuffer;
+};
+
 constexpr unsigned int FRAME_OVERLAP = 2;
 
 class VulkanEngine {
@@ -156,6 +163,9 @@ public:
 	std::unordered_map<std::string, Mesh> _meshes;
 
 	FrameData& get_current_frame();
+
+	UploadContext _uploadContext;
+	void immediate_submit(std::function<void(VkCommandBuffer cmd)>&& function);
 	
 	void load_meshes();
 	void init_scene();
