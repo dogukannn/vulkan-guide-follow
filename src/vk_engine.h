@@ -57,6 +57,11 @@ struct GPUSceneData
 	glm::vec4 sunlightColor;
 };
 
+struct GPUObjectData
+{
+	glm::mat4 modelMatrix;
+};
+
 class PipelineBuilder
 {
 public:
@@ -83,9 +88,11 @@ struct FrameData
 	VkCommandBuffer _mainCommandBuffer;
 
 	AllocatedBuffer cameraBuffer;
-
+	AllocatedBuffer objectBuffer;
+	VkDescriptorSet objectDescriptor;	
 	VkDescriptorSet globalDescriptor;
 };
+
 constexpr unsigned int FRAME_OVERLAP = 2;
 
 class VulkanEngine {
@@ -130,6 +137,7 @@ public:
 	FrameData _frames[FRAME_OVERLAP];
 
 	VkDescriptorSetLayout _globalSetLayout;
+	VkDescriptorSetLayout _objectSetLayout;
 	VkDescriptorPool _descriptorPool;
 
 	GPUSceneData _sceneParameters;
