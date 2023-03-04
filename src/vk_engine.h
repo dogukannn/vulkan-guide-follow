@@ -41,7 +41,21 @@ struct MeshPushConstants
 	glm::mat4 render_matrix;
 };
 
+struct GPUCameraData
+{
+	glm::mat4 view;
+	glm::mat4 proj;
+	glm::mat4 viewProj;
+};
 
+struct GPUSceneData
+{
+	glm::vec4 fogColor;
+	glm::vec4 fogDistance;
+	glm::vec4 ambientColor;
+	glm::vec4 sunlightDirection;
+	glm::vec4 sunlightColor;
+};
 
 class PipelineBuilder
 {
@@ -67,6 +81,10 @@ struct FrameData
 
 	VkCommandPool _commandPool;
 	VkCommandBuffer _mainCommandBuffer;
+
+	AllocatedBuffer cameraBuffer;
+
+	VkDescriptorSet globalDescriptor;
 };
 constexpr unsigned int FRAME_OVERLAP = 2;
 
@@ -88,6 +106,7 @@ public:
 	VkDebugUtilsMessengerEXT _debug_messenger;
 	VkPhysicalDevice _chosenGPU;
 	VkDevice _device;
+	VkPhysicalDeviceProperties _gpuProperties;
 	VkSurfaceKHR _surface;
 
 	VkSwapchainKHR _swapchain;
@@ -109,6 +128,12 @@ public:
 	std::vector<VkFramebuffer> _framebuffers;
 	
 	FrameData _frames[FRAME_OVERLAP];
+
+	VkDescriptorSetLayout _globalSetLayout;
+	VkDescriptorPool _descriptorPool;
+
+	GPUSceneData _sceneParameters;
+	AllocatedBuffer _sceneParameterBuffer;
 	
 	VkPipelineLayout _trianglePipelineLayout;
 	VkPipelineLayout _meshPipelineLayout;
@@ -131,6 +156,10 @@ public:
 	Material* get_material(const std::string& name);
 	Mesh* get_mesh(const std::string& name);
 	void draw_objects(VkCommandBuffer cmd, RenderObject* first, int count);	
+
+	AllocatedBuffer create_buffer(size_t allocSize, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage);
+	void init_descriptors();
+	size_t pad_uniform_buffer_size(size_t originalSize);
 	
 	void init_vulkan();
 	void init_swapchain();
